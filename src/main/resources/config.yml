@@ -1,0 +1,24 @@
+gui:
+  brand: 'Cool app!'
+  title: 'the head title'
+  search: true
+  menu:
+    Home: /
+    OSBB: /osbb
+    About:
+      About Us: /about
+      About You: /
+
+jdbc:
+  driver: com.mysql.jdbc.Driver
+  url: jdbc:mysql://localhost:3306/prog
+  username: root
+  password: root
+
+hibernate:
+  dialect: org.hibernate.dialect.MySQL5Dialect
+  connection:
+    driver_class: com.mysql.jdbc.Driver
+    username: root
+    password: root
+    url: jdbc:mysql://localhost:3306/prog
