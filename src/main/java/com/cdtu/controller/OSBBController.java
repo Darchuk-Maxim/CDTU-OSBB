@@ -8,7 +8,6 @@ import org.rapidoid.annotation.GET;
 import org.rapidoid.annotation.POST;
 import org.rapidoid.annotation.Page;
 import org.rapidoid.gui.GUI;
-import org.rapidoid.gui.input.Form;
 import org.rapidoid.html.customtag.ColspanTag;
 import org.rapidoid.http.Req;
 import org.rapidoid.http.Resp;
@@ -16,7 +15,6 @@ import org.rapidoid.jpa.JPA;
 import org.rapidoid.security.annotation.LoggedIn;
 import org.rapidoid.security.annotation.Roles;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -37,47 +35,48 @@ public class OSBBController {
             Osbb osbb = subscription.osbb;
 
             List<Question> all = JPA.jpql("SELECT u FROM Question u WHERE u.osbb.id = ?1", (long) osbb.id).all();
-            List<ColspanTag> tags = new ArrayList<>();
-
-            all.forEach(el -> {
-                List<Vote> votes = JPA.jpql("SELECT v FROM Vote v WHERE v.question.id = ?1", el.id).all();
-                        Map<Boolean, List<Vote>> collect = votes.stream().collect(Collectors.groupingBy(el1 -> el1.vote));
-                        //                Map<Integer, Vote> collect = votes.stream()
-//                        .collect(Collectors.groupingBy(vote -> vote));
-                tags.add(
-                                GUI.col12(
-                                        GUI.div(GUI.col12(GUI.h4(el.question)),
-                                                GUI.col6(GUI.col2(GUI.btn("+").info().go("/vote/" + el.id + "/1")),
-                                                        GUI.col2(GUI.h4(collect.getOrDefault(true, new ArrayList<>()).size()))),
-                                                GUI.col6(GUI.col2(GUI.btn("-").warning().go("/vote/" + el.id + "/0")),
-                                                        GUI.col2(GUI.h4(collect.getOrDefault(false, new ArrayList<>()).size()))))
-                                ));
-                    }
-            );
-
-
-            return GUI.col12(
-                    GUI.col12(GUI.render("questioncreate.html")),
-                    GUI.col12(tags.toArray(new ColspanTag[tags.size()])));
+            return showQuestionAndVoteButton(all);
         }
-
     }
 
-    @LoggedIn
-    @POST("/qustion")
-    public void qustionSave(Question question, Req req, Resp resp) {
-        User user = UserUtils.currentUser(req);
-        Osbb osbb = getOsbb(user);
-        question.osbb = osbb;
+    private Object showQuestionAndVoteButton(List<Question> all) {
+        List<ColspanTag> tags = new ArrayList<>();
 
-        JPA.save(question);
-        resp.redirect("/osbb");
+        all.forEach(el -> {
+                    List<Vote> votes = JPA.jpql("SELECT v FROM Vote v WHERE v.question.id = ?1", el.id).all();
+                    Map<Boolean, List<Vote>> collect = votes.stream().collect(Collectors.groupingBy(el1 -> el1.vote));
+
+                    tags.add(
+                            GUI.col12(
+                                    GUI.div(GUI.col12(GUI.h4(GUI.a(el.question).href("/question/detail/" + el.id))),
+                                            GUI.col4(GUI.col2(GUI.btn("За").info().go("/vote/" + el.id + "/1")),
+                                                     GUI.col2(GUI.h4(collect.getOrDefault(true, new ArrayList<>()).size())),
+                                                     GUI.col3(GUI.btn("Против").warning().go("/vote/" + el.id + "/0")),
+                                                     GUI.col2(GUI.h4(collect.getOrDefault(false, new ArrayList<>()).size())))
+                                    )
+                            )
+                    );
+                }
+        );
+
+        return GUI.col12(
+                GUI.col12(GUI.btn("Создать вопрос").success().go("/question")),
+                GUI.col12(GUI.titleBox("Список вопросов")),
+                GUI.col12(tags.toArray(new ColspanTag[tags.size()])));
     }
 
-    private Osbb getOsbb(User user) {
-        List<Osbb> all = JPA.jpql("SELECT sub FROM Osbb sub WHERE sub.admin.id = ?1", user.id).all();
-        return all.get(0);
-    }
+//    @LoggedIn
+//    @POST("/qustion")
+//    public void qustionSave(Question question, Req req, Resp resp) {
+//        User user = UserUtils.currentUser(req);
+//        Osbb osbb = getOsbb(user);
+//        question.osbb = osbb;
+//
+//        JPA.save(question);
+//        resp.redirect("/osbb");
+//    }
+
+
 
     @Roles("ADMIN")
     @POST("/save")

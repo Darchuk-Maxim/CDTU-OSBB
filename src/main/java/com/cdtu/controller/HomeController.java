@@ -38,7 +38,7 @@ public class HomeController {
             all1.forEach(el -> tags.add(GUI.col12(GUI.h5(el.user.login))));
             return GUI.col12(
                     GUI.h2(osbb.city + ", " + osbb.street + ", " + osbb.number),
-                    GUI.h3("Users on OSBB"),
+                    GUI.h3("Пользователи ОСББ"),
                     GUI.col12(tags.toArray(new ColspanTag[tags.size()]))
                     );
         } else {
