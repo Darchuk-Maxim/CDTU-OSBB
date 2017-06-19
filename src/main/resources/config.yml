@@ -1,7 +1,7 @@
 gui:
-  brand: 'Cool app!'
-  title: 'the head title'
-  search: true
+  brand: ''
+  title: 'ОСББ'
+  search: false
   menu:
     Home: /
     OSBB: /osbb
